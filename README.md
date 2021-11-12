@@ -1,5 +1,4 @@
 # pg_activity - docker
-Official Repo: https://github.com/dalibo/pg_activity
 
 Usage
 -------
