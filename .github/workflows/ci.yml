@@ -7,7 +7,6 @@ on:
 
 jobs:
   docker:
-    container: gitguardian/ggshield:latest
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -29,7 +28,3 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: rsmnarts/pg_activity
-
-      - name: Scan image with ggshield
-        run: |
-          ggshield scan docker rsmnarts/pg_activity
