@@ -6,35 +6,8 @@ on:
       - 'main'
 
 jobs:
-  test:
-    container: gitguardian/ggshield:latest
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -t docker.io/rsmnarts/pg_activity:${{ github.sha }} .
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'docker.io/rsmnarts/pg_activity:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
-        with:
-          sarif_file: 'trivy-results.sarif'
-          
-      - name: Scan image with ggshield
-        run: |
-          ggshield scan docker rsmnarts/pg_activity:${{ github.sha }}
-    
   docker:
+    container: gitguardian/ggshield:latest
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
@@ -56,3 +29,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: rsmnarts/pg_activity
+
+      - name: Scan image with ggshield
+        run: |
+          ggshield scan docker rsmnarts/pg_activity:${{ github.sha }}
