@@ -32,7 +32,7 @@ jobs:
           
       - name: Scan image with ggshield
         run: |
-          ggshield scan docker localhost:5000/gitguardian/ggshield:latest
+          ggshield scan docker rsmnarts/pg_activity:${{ github.sha }}
     
   docker:
     runs-on: ubuntu-latest
