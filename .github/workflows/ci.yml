@@ -32,4 +32,4 @@ jobs:
 
       - name: Scan image with ggshield
         run: |
-          ggshield scan docker rsmnarts/pg_activity:${{ github.sha }}
+          ggshield scan docker rsmnarts/pg_activity
