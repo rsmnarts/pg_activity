@@ -1,95 +1,115 @@
 # pg_activity - docker
 
-Usage
--------
+## Usage
+
 ```bash
-docker run --rm -it rsmnarts/pg_activity --help
+docker run --rm -it PGUSER= rsmnarts/pg_activity -U postgres -h host.docker.internal
 ```
+
 ```bash
 docker run --rm -it -e PGHOST=host.docker.internal -e PGUSER=postgres rsmnarts/pg_activity
 ```
-Options
--------
 
-    pg_activity [options]
+more help:
+
+```bash
+docker run --rm -it rsmnarts/pg_activity --help
+```
+
+## Options
+
+    pg_activity [options] [connection string]
 
     Options:
-        --version             Show program's version number and exit
-        -U USERNAME, --username=USERNAME
-                              Database user name (default: "postgres").
-        -p PORT, --port=PORT  Database server port (default: "5432").
-        -h HOSTNAME, --host=HOSTNAME
-                              Database server host or socket directory (default:
-                              "localhost").
-        -d DBNAME, --dbname=DBNAME
-                              Database name to connect to (default: "postgres").
-        --blocksize=BLOCKSIZE Filesystem blocksize (default: 4096).
-        --rds                 Enable support for AWS RDS.
-        --output=FILEPATH     Store running queries as CSV.
-        --help                Show this help message and exit.
-        --no-db-size          Skip total size of DB.
-        --min-duration        Don't display queries with smaller than specified
-                              duration (in seconds).
-        --verbose-mode=VERBOSE_MODE
-                              Queries display mode. Values: 1-TRUNCATED,
-                              2-FULL(default), 3-INDENTED
-        --duration-mode=DURATION_MODE
-                              Duration mode. Values: 1-QUERY(default),
-                              2-TRANSACTION, 3-BACKEND
+      --blocksize BLOCKSIZE
+                            Filesystem blocksize (default: 4096).
+      --rds                 Enable support for AWS RDS (implies --no-tempfiles and filters out the rdsadmin database from space calculation).
+      --output FILEPATH     Store running queries as CSV.
+      --no-db-size          Skip total size of DB.
+      --no-tempfiles        Skip tempfile count and size.
+      --no-walreceiver      Skip walreceiver checks.
+      -w, --wrap-query      Wrap query column instead of truncating.
+      --duration-mode DURATION_MODE
+                            Duration mode. Values: 1-QUERY(default), 2-TRANSACTION, 3-BACKEND.
+      --min-duration SECONDS
+                            Don't display queries with smaller than specified duration (in seconds).
+      --filter FIELD:REGEX  Filter activities with a (case insensitive) regular expression applied on selected fields. Known fields are: dbname.
+      --debug-file DEBUG_FILE
+                            Enable debug and write it to DEBUG_FILE.
+      --version             show program's version number and exit.
+      --help                Show this help message and exit.
 
+    Connection Options:
+      connection string     A valid connection string to the database, e.g.: 'host=HOSTNAME port=PORT user=USER dbname=DBNAME'.
+      -h HOSTNAME, --host HOSTNAME
+                            Database server host or socket directory.
+      -p PORT, --port PORT  Database server port.
+      -U USERNAME, --username USERNAME
+                            Database user name.
+      -d DBNAME, --dbname DBNAME
+                            Database name to connect to.
 
-    Display options, you can exclude some columns by using them :
-        --no-database         Disable DATABASE.
-        --no-user             Disable USER.
-        --no-client           Disable CLIENT.
-        --no-cpu              Disable CPU%.
-        --no-mem              Disable MEM%.
-        --no-read             Disable READ/s.
-        --no-write            Disable WRITE/s.
-        --no-time             Disable TIME+.
-        --no-wait             Disable W.
-        --no-app-name         Disable App.
+    Process table display options:
+      These options may be used hide some columns from the processes table.
 
+      --no-pid              Disable PID.
+      --no-database         Disable DATABASE.
+      --no-user             Disable USER.
+      --no-client           Disable CLIENT.
+      --no-cpu              Disable CPU%.
+      --no-mem              Disable MEM%.
+      --no-read             Disable READ/s.
+      --no-write            Disable WRITE/s.
+      --no-time             Disable TIME+.
+      --no-wait             Disable W.
+      --no-app-name         Disable App.
 
-Notes
------
+    Other display options:
+      --hide-queries-in-logs
+                            Disable log_min_duration_statements and log_min_duration_sample for pg_activity.
+      --no-inst-info        Display instance information in header.
+      --no-sys-info         Display system information in header.
+      --no-proc-info        Display workers process information in header.
+      --refresh REFRESH     Refresh rate. Values: 0.5, 1, 2, 3, 4, 5 (default: 2).
+
+## Notes
 
 Length of SQL query text that `pg_activity` reports relies on PostgreSQL
 parameter `track_activity_query_size`. Default value is `1024` (expressed in
 bytes). If your SQL query text look truncated, you should increase
 `track_activity_query_size`.
 
+## Interactives commands
 
-Interactives commands
----------------------
+| Key       | Action                                                            |
+| --------- | ----------------------------------------------------------------- |
+| `r`       | Sort by READ/s, descending                                        |
+| `w`       | Sort by WRITE/s, descending                                       |
+| `c`       | Sort by CPU%, descending                                          |
+| `m`       | Sort by MEM%, descending                                          |
+| `t`       | Sort by TIME+, descending                                         |
+| `T`       | Change duration mode: query, transaction, backend                 |
+| `Space`   | Pause on/off                                                      |
+| `v`       | Change queries display mode: full, indented, truncated            |
+| `UP/DOWN` | Scroll processes list                                             |
+| `k/j`     | Scroll processes list                                             |
+| `q`       | Quit                                                              |
+| `+`       | Increase refresh time. Maximum value : 5s                         |
+| `-`       | Decrease refresh time. Minimum Value : 0.5s                       |
+| `F1/1`    | Running queries list                                              |
+| `F2/2`    | Waiting queries list                                              |
+| `F3/3`    | Blocking queries list                                             |
+| `h`       | Help page                                                         |
+| `R`       | Refresh                                                           |
+| `D`       | Refresh Database Size (including when --no-dbzise option applied) |
+| `s`       | Display system information in header                              |
+| `i`       | Display general instance information in header                    |
+| `o`       | Display worker information in header                              |
 
-| Key       | Action                                                           |
-|-----------|------------------------------------------------------------------|
-| `r`       | Sort by READ/s, descending                                       |
-| `w`       | Sort by WRITE/s, descending                                      |
-| `c`       | Sort by CPU%, descending                                         |
-| `m`       | Sort by MEM%, descending                                         |
-| `t`       | Sort by TIME+, descending                                        |
-| `T`       | Change duration mode: query, transaction, backend                |
-| `Space`   | Pause on/off                                                     |
-| `v`       | Change queries display mode: full, indented, truncated           |
-| `UP/DOWN` | Scroll processes list                                            |
-| `k/j`     | Scroll processes list                                            |
-| `q`       | Quit                                                             |
-| `+`       | Increase refresh time. Maximum value : 5s                        |
-| `-`       | Decrease refresh time. Minimum Value : 0.5s                      |
-| `F1/1`    | Running queries list                                             |
-| `F2/2`    | Waiting queries list                                             |
-| `F3/3`    | Blocking queries list                                            |
-| `h`       | Help page                                                        |
-| `R`       | Refresh                                                          |
-| `D`       | Refresh Database Size (including when --no-dbzise option applied)|
-
-Navigation mode
----------------
+## Navigation mode
 
 | Key        | Action                                        |
-|------------|-----------------------------------------------|
+| ---------- | --------------------------------------------- |
 | `UP`/`k`   | Move up the cursor                            |
 | `DOWN`/`j` | Move down the cursor                          |
 | `K`        | Terminate the current backend/tagged backends |
@@ -97,32 +117,3 @@ Navigation mode
 | `Space`    | Tag or untag the process                      |
 | `q`        | Quit                                          |
 | `Other`    | Back to activity                              |
-
-FAQ
----
-
-**I can't see my queries only TPS is shown**
-
-`pg_activity` scans the view `pg_stat_activity` with a user defined refresh
-time comprised between O.5 and 5 seconds. It can be modified in the interface
-with the `+` and `-` keys. Any query executed between two scans won't be
-displayed.
-
-
-What is more, `pg_activity` uses different queries to get :
-
-*    settings from `pg_settings`
-*    version info using `version()`
-*    queries and number of connections from `pg_stat_activity`
-*    locks from `pg_locks`
-*    tps from `pg_database` using `pg_stat_get_db_xact_commit()` and
-     `pg_stat_get_db_xact_rollback()`
-*    and more ( eg : `pg_cancel_backend()` and `pg_terminate_backend()` )
-
-Thoses queries cannot be seen in the query tab because all queries issued from
-the `pg_activity` backend are considered as noise and are not displayed . On
-the other hand, the transactions used to get the info for `pg_activity`'s
-reporting are still accounted for by postgres in `pg_stat_get_db_xact_commit()`
-and `pg_stat_get_db_xact_commit()`. Therefore `pg_activity` will display a non
-zero TPS even with no activity on the database, and/or no activity displayed on
-screen.
